@@ -68,7 +68,7 @@ void loadResources() {
   backgroundMusic = new SoundFile(this, "sounds/background_music.mp3");
   carHitSound = new SoundFile(this, "sounds/car_hit.mp3");
   speedIncreaseSound = new SoundFile(this, "sounds/speed_incease.mp3");
-  speedDecreaseSound = new SoundFile(this, "sounds/speed_decrease.mp3");
+  speedDecreaseSound = new SoundFile(this, "sounds/speed_decrease.wav");
   maxSpeedSound = new SoundFile(this, "sounds/max_speed.mp3");
   deathSound = new SoundFile(this, "sounds/explosion.mp3");
   policeSirenSound = new SoundFile(this, "sounds/police_siren.mp3");
