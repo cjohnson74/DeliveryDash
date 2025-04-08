@@ -68,7 +68,7 @@ void loadResources() {
   backgroundMusic = new SoundFile(this, "sounds/background_music.mp3");
   carHitSound = new SoundFile(this, "sounds/car_hit.mp3");
   speedIncreaseSound = new SoundFile(this, "sounds/speed_incease.mp3");
-  speedDecreaseSound = new SoundFile(this, "sounds/speed_decrease.wav");
+  speedDecreaseSound = new SoundFile(this, "sounds/speed_decrease.mp3");
   maxSpeedSound = new SoundFile(this, "sounds/max_speed.mp3");
   deathSound = new SoundFile(this, "sounds/explosion.mp3");
   policeSirenSound = new SoundFile(this, "sounds/police_siren.mp3");
@@ -85,14 +85,11 @@ void loadResources() {
        break;
      case GAME_REGULAR:
      case GAME_SUDDEN_DEATH:
-       game.update();
-       game.display();
+       // Will be implemented in future stages
        break;
      case GAME_OVER:
-       drawGameOver();
-       break;
      case GAME_WIN:
-       drawWin();
+       // Will be implemented in future stages
        break;
    }
  }
@@ -102,13 +99,13 @@ void loadResources() {
  */
  void drawMenu() {
    background(0);
-   // Menu implementation to be added
-   // Should include buttons for:
+   // Menu design includes:
    // - Car selection (Standard, Super (High Top Speed), Sport (Hight acceleration))
    // - Regular mode
    // - Sudden Death mode
    // - Exit game
- 
+   
+   // Placeholder text for design
    fill(255);
    textSize(48);
    textAlign(CENTER);
@@ -126,58 +123,21 @@ void loadResources() {
    
    // Mode buttons would go here
  }
- 
- /**
-  * Draws the game over screen
-  */
-void drawGameOver() {
-  background(0);
-  fill(255, 0, 0);
-  textSize(48);
-  textAlign(CENTER);
-  text("GAME OVER", width/2, height/2);
-  // Add restart and menu buttons
-}
-
-/**
- * Draws the win screen
- */
-void drawWin() {
-  background(0);
-  fill(0, 255, 0);
-  textSize(48);
-  textAlign(CENTER);
-  text("YOU WIN", width/2, height/2);
-  // Add restart and menu buttons
-}
 
 /**
  * Handles keyboard input
+ * To be implemented in future stages
  */
 void keyPressed() {
-  if (gameState == GAME_REGULAR || gameState == GAME_SUDDEN_DEATH) {
-    game.handleKeyPress(key);
-  }
-}
-
-/**
- * Handles key release
- */
-void keyReleased() {
-  if (gameState == GAME_REGULAR || gameState == GAME_SUDDEN_DEATH) {
-    game.handleKeyRelease(key);
-  }
+  // Will handle WASD and/or arrow keys for driving
 }
 
 /**
  * Handles mouse clicks for menu navigation
+ * To be implemented in future stages
  */
 void mousePressed() {
-  if (gameState == MENU) {
-    // handle menu button clicks
-  } else if (gameState == GAME_OVER || gameState == GAME_WIN) {
-    // Handle restart or menu buttons
-  }
+  // Will handle menu button clicks
 }
 
 /**
@@ -191,6 +151,7 @@ enum CarType {
 
 /**
  * PlayerCar class - represents the player's vehicle
+ * This class is partially implemented as required for Stage 1
  */ 
 class PlayerCar {
   float x, y;
@@ -198,7 +159,7 @@ class PlayerCar {
   float topSpeed;
   float acceleration;
   int health;
-  boolean hasDonut;
+  boolean hasDonut; // Invincibility against cops
   CarType carType;
   int carIndex;
   String carName;
@@ -258,17 +219,7 @@ class PlayerCar {
    * Displays the player's car on screen
    */
   void display() {
-    image(playerCarImgs[carIndex], x, y);
-    
-    // Display health and donut status
-    fill(255);
-    textSize(16);
-    text("Health: " + health, 20, 30);
-    text("Car: " + carName, 150, 30);
-    
-    if (hasDonut) {
-      image(donutImg, 240, 20, 30, 30);
-    }
+    // Will display car image and stats
   }
   
   /**
@@ -287,7 +238,7 @@ class PlayerCar {
     * Decrease the car's speed
     */
     void decelerate() {
-      speed = max(speed - acceleration 0);
+      speed = max(speed - acceleration, 0);
       speedDcreaseSound.play();
     }
     
@@ -300,4 +251,218 @@ class PlayerCar {
       carHitSound.play();
       return this.health > 0;
     }
+}
+
+/** 
+ * PoliceCar class - represents police vehicles that enfore speed limits
+ */
+class PoliceCar {
+  float x, y;
+  float speed;
+  
+  /**
+   * Constructor for the PoliceCar class
+   */
+  PoliceCar(float x, float y) {
+    this.x = x;
+    this.y = y;
+    thhis.speed = 0; // Will be set to -PlayerSpeed
+  }
+  
+  /**
+   * Updates the police car's position
+   * To be implemented in future stages
+   */
+  void update(float playerSpeed) {
+    // Will update position based on player speed
+  }
+  
+  /**
+   * Displays the police car on screen
+   * To be implemeneted in future stages
+   */
+  void display() {
+    // Sill displa police car image
+  }
+  
+  /**
+   * Checks if the player is speeding when near the police
+   * To be implemented in future stages
+   */
+  boolean isCatchingSpeeder(float playerSpeed, float speedLimit, boolean hasDonut) {
+    // Will check for speed violations
+    return false;
+  }
+}
+
+/**
+ * NPCVehicle class - base class for non-player vehicles
+ */
+class NPCVehicle {
+  float x, y;
+  float speed;
+  PImage vehicleImage;
+  float width, height;
+  
+  /**
+   * Constructor for the NPCVehicle class
+   */
+  NPCVehicle(float x, float y, PImage vehicleImage, float w, float h) {
+    this.x = x;
+    this.y = y;
+    this.speed = 0;
+    this.vehicleImage = vehicleImage;
+    this.width = w;
+    this.height = h;
+  }
+  
+  /**
+   * Updaets the NPC vehicle's position
+   * To be implemented in future stages
+   */
+  void update(float playerSpeed) {
+    // Will update position based on player speed
+  }
+  
+  /**
+   * Displays the NPC vehicle on screen
+   * To be implemented in future stages
+   */
+  void display() {
+    // Will display vehicle image
+  }
+  
+  /**
+   * Checks for collision withh the player's car
+   * To be implmented in future stages
+   */
+  boolean checkCollision(float playerX, float playerY, float playerWidth, float playerHeight) {
+    // Will check for collisions
+    return false;
+  }
+}
+
+/**
+ * NPCCar class - represnets civilian cars on road
+ */
+class NPCCar extends NPCVehicle {
+  /**
+   * Constructor for the NPCCar class
+   */
+  NPCCar(float x, float y) {
+    super(x, y, npcCarImg, 60, 40);
+  }
+}
+
+/**
+ * NPCTruck class - represents trucks on the road
+ */
+class NPCTruck extends NPCVehicle {
+  /**
+   * Constrictor for the NPCTruck class
+   */
+  NPCTruck(float x, float y) {
+    super(x, y, npcTruckImg, 100, 50);
+  }
+}
+
+/**
+ * Background class - represents the scrolling background
+ */
+class Background {
+  float x;
+  float speed;
+  
+  /**
+   * Constructor for the Background class
+   */
+  Background() {
+    this.x = 9;
+    this.speed = 0;
+  }
+  
+  /**
+   * Updates the background's positions
+   * To be implemented in future stages
+   */
+  void update(float playerSpeed) {
+    // Will update background position based on player speed
+  }
+  
+  /**
+   * Displays the scrolling background
+   * To be implemented in future stages
+   */
+  void display() {
+    // Will display scrolling background
+  }
+}
+
+/**
+ * Game class - manages the overall game state and logic
+ */
+class Game {
+  PlayerCar player;
+  PoliceCar policeCar;
+  ArrayList<NPCCar> npcCars;
+  ArrayList<NPCTruck> npcTrucks;
+  Background background;
+  
+  float timeLimit;
+  float timePassed;
+  float distanceTraveled;
+  float totalDistance;
+  float speedLimit;
+  boolean winFlag;
+  
+  /**
+   * Constructor for the Game class
+   */
+  Game() {
+    this.player = new PlayerCar(100, height/2);
+    this.policeCar = new PoliceCar(-50, 50);
+    this.npcCars = new ArrayList<NPCCar>();
+    this.npcTrucks = new ArrayList<NPCTruck>();
+    this.background = new Background();
+    
+    // Initialize game parameters
+    this.timeLimit = 60; // 60 seconds
+    this.timePassed = 0;
+    this.distanceTraveled = 0;
+    this.totalDistance = 1000; // Units to travel
+    this.speedLimit = 7; // Speed limit
+    this.winFlag = false;
+  }
+  
+  /**
+   * Updates the game state
+   * To be implemented in future stages
+   */
+  void update() {
+    // Will update all game elements
+  }
+  
+  /**
+   * Displays the game elements
+   * To be implemented in future stages
+   */
+  void display() {
+    // Will display all game elements
+  }
+  
+  /**
+   * Sets up game for regular mode
+   * To be implemented in future stages
+   */
+  void setupRegularMode() {
+    // Will set up parameters for regular mode
+  }
+  
+  /**
+   * Sets up the game for sudden death mode
+   * To be implemented in future stages
+   */
+  void setupSuddenDeathMode() {
+    // Will set up parameters for sudden death mode
+  }
 }
