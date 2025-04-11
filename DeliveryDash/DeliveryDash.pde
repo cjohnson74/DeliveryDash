@@ -9,6 +9,7 @@
 
 // Image variables
 PImage backgroundImg;
+Background bg;
 PImage[] playerCarImgs; // Array of different car images
 PImage policeCarImg;
 PImage npcCarImg;
@@ -20,10 +21,10 @@ import processing.sound.*;
 SoundFile backgroundMusic;
 SoundFile carHitSound;
 SoundFile speedIncreaseSound;
-SoundFile speedDecreasesSound;
+SoundFile speedDecreaseSound;
 SoundFile maxSpeedSound;
 SoundFile deathSound;
-SoundFile policSirenSound;
+SoundFile policeSirenSound;
 SoundFile tiresScreechSound;
 
 // Game state constants
@@ -41,7 +42,7 @@ Game game;
  * Setup funcrion - initilize the game
 */
 void setup() {
-  size(800, 600);
+  size(1024, 1024);
   loadResources();
   game = new Game();
 }
@@ -52,6 +53,7 @@ void setup() {
 void loadResources() {
   // Load images
   backgroundImg = loadImage("images/background.png");
+  bg = new Background();
   
   // Load different player car images
   playerCarImgs = new PImage[3];
@@ -99,6 +101,7 @@ void loadResources() {
  */
  void drawMenu() {
    background(0);
+   bg.display();
    // Menu design includes:
    // - Car selection (Standard, Super (High Top Speed), Sport (Hight acceleration))
    // - Regular mode
@@ -239,7 +242,7 @@ class PlayerCar {
     */
     void decelerate() {
       speed = max(speed - acceleration, 0);
-      speedDcreaseSound.play();
+      speedDecreaseSound.play();
     }
     
     /**
@@ -266,7 +269,7 @@ class PoliceCar {
   PoliceCar(float x, float y) {
     this.x = x;
     this.y = y;
-    thhis.speed = 0; // Will be set to -PlayerSpeed
+    this.speed = 0; // Will be set to -PlayerSpeed
   }
   
   /**
@@ -371,14 +374,18 @@ class NPCTruck extends NPCVehicle {
  */
 class Background {
   float x;
+  float y;
   float speed;
+  PImage bgImg;
   
   /**
    * Constructor for the Background class
    */
   Background() {
-    this.x = 9;
-    this.speed = 0;
+    this.x = 0;
+    this.y = 0;
+    this.speed = 2;
+    this.bgImg = backgroundImg;
   }
   
   /**
@@ -395,6 +402,12 @@ class Background {
    */
   void display() {
     // Will display scrolling background
+    y+= speed;
+    if(y >= bgImg.height) {
+      y = 0;
+    }
+    image(bgImg, 0, y - bgImg.height);
+    image(bgImg, 0, y);
   }
 }
 
