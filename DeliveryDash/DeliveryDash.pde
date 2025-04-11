@@ -44,6 +44,7 @@ Game game;
 void setup() {
   size(1024, 1024);
   loadResources();
+  backgroundMusic.loop();
   game = new Game();
 }
 
