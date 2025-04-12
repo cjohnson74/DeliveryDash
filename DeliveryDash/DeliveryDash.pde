@@ -334,6 +334,17 @@ class NPCVehicle {
    */
   void display() {
     // Will display vehicle image
+    
+    // load upm cars
+    String[] npcCar_names = {"NPC_Blue.png", "NPC_Gray.png", "NPC_Orange.png", "NPC_Green.png", "NPC_Yellow.webp"};
+    
+    for(int i = 0; i < npcCar_names.length; i++) {
+      float x = random(0, width);
+      float y = random(-height, 0); // Start off-screen
+      PImage vehicleImage = loadImage(npcCar_names[(int)random(npcCar_names.length - 1)]);
+      game.npcCars.add(new NPCCar(x, y, vehicleImage));
+    
+    }
   }
   
   /**
