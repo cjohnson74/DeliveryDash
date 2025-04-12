@@ -15,6 +15,7 @@ PImage policeCarImg;
 PImage npcCarImg;
 PImage npcTruckImg;
 PImage donutImg;
+PImage vehicleSpriteSheet; // Add sprite sheet variable
 
 // Sound variable
 import processing.sound.*;
@@ -39,13 +40,14 @@ int gameState = MENU;
 Game game;
 
 /**
- * Setup funcrion - initilize the game
+ * Setup function - initialize the game
 */
 void setup() {
   size(1024, 1024);
   loadResources();
   backgroundMusic.loop();
   game = new Game();
+  gameState = MENU; // Start in menu mode
 }
 
 /**
@@ -56,23 +58,27 @@ void loadResources() {
   backgroundImg = loadImage("images/background.png");
   bg = new Background();
   
-  // Load different player car images
-  playerCarImgs = new PImage[3];
-  playerCarImgs[0] = loadImage("images/player_car_standard.png"); // Balanced car
-  playerCarImgs[1] = loadImage("images/player_car_super.png"); // Fast car with high top speed
-  playerCarImgs[2] = loadImage("images/player_car_sport.png"); // Agile car with high acceleration
+  // Load vehicle sprite sheet
+  vehicleSpriteSheet = loadImage("images/2D Top down 180 pixel vehicles/2D Top Down 180 Vehicles ( size x2 ).png");
   
-  policeCarImg = loadImage("images/police_car.png");
-  npcCarImg = loadImage("images/npc_car.png");
-  npcTruckImg = loadImage("images/npc_truck.png");
-  donutImg = loadImage("images/donut.png");
+  // Load different player car images from sprite sheet
+  playerCarImgs = new PImage[3];
+  // Extract car images from sprite sheet (you may need to adjust these coordinates based on the actual sprite sheet layout)
+  playerCarImgs[0] = vehicleSpriteSheet.get(0, 0, 180, 180); // Standard car
+  playerCarImgs[1] = vehicleSpriteSheet.get(180, 0, 180, 180); // Super car
+  playerCarImgs[2] = vehicleSpriteSheet.get(360, 0, 180, 180); // Sport car
+  
+  policeCarImg = vehicleSpriteSheet.get(540, 0, 180, 180); // Police car
+  npcCarImg = loadImage("images/NPC_Blue.png");
+  npcTruckImg = vehicleSpriteSheet.get(720, 0, 180, 180); // Truck
+  donutImg = loadImage("images/donut.jpg");
   
   // Load sounds
   backgroundMusic = new SoundFile(this, "sounds/background_music.mp3");
-  carHitSound = new SoundFile(this, "sounds/car_hit.mp3");
-  speedIncreaseSound = new SoundFile(this, "sounds/speed_incease.mp3");
+  carHitSound = new SoundFile(this, "sounds/explosion.mp3"); // Using explosion sound for car hit
+  speedIncreaseSound = new SoundFile(this, "sounds/speed_increase.mp3");
   speedDecreaseSound = new SoundFile(this, "sounds/speed_decrease.mp3");
-  maxSpeedSound = new SoundFile(this, "sounds/max_speed.mp3");
+  maxSpeedSound = new SoundFile(this, "sounds/speed_increase.mp3"); // Using speed increase sound for max speed
   deathSound = new SoundFile(this, "sounds/explosion.mp3");
   policeSirenSound = new SoundFile(this, "sounds/police_siren.mp3");
   tiresScreechSound = new SoundFile(this, "sounds/tires_screech.mp3");
@@ -81,59 +87,164 @@ void loadResources() {
 /**
  * Draw function - handles the game's visual rednering based on current state
  */
- void draw() {
-   switch(gameState) {
-     case MENU:
-       drawMenu();
-       break;
-     case GAME_REGULAR:
-     case GAME_SUDDEN_DEATH:
-       // Will be implemented in future stages
-       break;
-     case GAME_OVER:
-     case GAME_WIN:
-       // Will be implemented in future stages
-       break;
-   }
- }
- 
- /**
- * Draws the main menu of the game
- */
- void drawMenu() {
-   background(0);
-   bg.display();
-   // Menu design includes:
-   // - Car selection (Standard, Super (High Top Speed), Sport (Hight acceleration))
-   // - Regular mode
-   // - Sudden Death mode
-   // - Exit game
-   
-   // Placeholder text for design
-   fill(255);
-   textSize(48);
-   textAlign(CENTER);
-   text("DELIVERY DASH", width/2, 100);
-   
-   // Placeholder for car selection
-   textSize(24);
-   
-   // Car selection buttons would go here
-   // Each button would call game.player.setCarType() with the appropriate type
-   
-   // Game mode selection
-   textSize(24);
-   text("Select Game Mode:", width/2, 350);
-   
-   // Mode buttons would go here
- }
+void draw() {
+  background(0);
+  switch(gameState) {
+    case MENU:
+      drawMenu();
+      break;
+    case GAME_REGULAR:
+      if (game != null) {
+        game.update();
+        game.display();
+      } else {
+        println("Error: Game is null in GAME_REGULAR state!");
+        gameState = MENU;
+      }
+      break;
+    case GAME_SUDDEN_DEATH:
+      if (game != null) {
+        game.update();
+        game.display();
+      } else {
+        println("Error: Game is null in GAME_SUDDEN_DEATH state!");
+        gameState = MENU;
+      }
+      break;
+    case GAME_OVER:
+      if (game != null) {
+        game.display();
+      }
+      fill(255, 0, 0);
+      textSize(48);
+      textAlign(CENTER);
+      text("GAME OVER", width/2, height/2);
+      textSize(24);
+      text("Press ENTER to return to menu", width/2, height/2 + 50);
+      break;
+    case GAME_WIN:
+      if (game != null) {
+        game.display();
+      }
+      fill(0, 255, 0);
+      textSize(48);
+      textAlign(CENTER);
+      text("YOU WIN!", width/2, height/2);
+      textSize(24);
+      text("Press ENTER to return to menu", width/2, height/2 + 50);
+      break;
+  }
+}
 
 /**
- * Handles keyboard input
- * To be implemented in future stages
+ * Draws the main menu of the game
+ */
+void drawMenu() {
+  background(0);
+  
+  // Update and display background with a slow scroll speed
+  bg.scrollSpeed = 1; // Set a slow scroll speed for menu
+  bg.update(1); // Pass a small value to update
+  bg.display();
+  
+  // Menu design includes:
+  // - Car selection (Standard, Super (High Top Speed), Sport (Hight acceleration))
+  // - Regular mode
+  // - Sudden Death mode
+  // - Exit game
+  
+  // Placeholder text for design
+  fill(255);
+  textSize(48);
+  textAlign(CENTER);
+  text("DELIVERY DASH", width/2, 100);
+  
+  // Placeholder for car selection
+  textSize(24);
+  
+  // Car selection buttons would go here
+  // Each button would call game.player.setCarType() with the appropriate type
+  
+  // Game mode selection
+  textSize(24);
+  text("Select Game Mode:", width/2, 350);
+  
+  // Mode buttons would go here
+}
+
+/**
+ * Handles keyboard input for car movement
  */
 void keyPressed() {
-  // Will handle WASD and/or arrow keys for driving
+  // Only print state changes
+  if (keyCode == ENTER && (gameState == MENU || gameState == GAME_OVER || gameState == GAME_WIN)) {
+    println("Game state changing from: " + gameState);
+  }
+  
+  // Only handle movement if in game states
+  if (gameState == GAME_REGULAR || gameState == GAME_SUDDEN_DEATH) {
+    if (game != null && game.player != null) {
+      // Acceleration controls
+      if (key == 'w' || key == 'W' || keyCode == UP) {
+        game.player.isAccelerating = true;
+      }
+      if (key == 's' || key == 'S' || keyCode == DOWN) {
+        game.player.decelerate(); // Call decelerate directly
+      }
+      
+      // Turning controls
+      if (key == 'a' || key == 'A' || keyCode == LEFT) {
+        game.player.turnLeft();
+      }
+      if (key == 'd' || key == 'D' || keyCode == RIGHT) {
+        game.player.turnRight();
+      }
+      
+      // Car type selection (for testing)
+      if (key == '1') {
+        game.player.setCarType(CarType.STANDARD);
+      }
+      if (key == '2') {
+        game.player.setCarType(CarType.SUPER);
+      }
+      if (key == '3') {
+        game.player.setCarType(CarType.SPORT);
+      }
+    } else {
+      println("Error: Game or player is null!");
+    }
+  }
+  
+  // Game state controls
+  if (keyCode == ENTER) {
+    if (gameState == MENU) {
+      if (game == null) {
+        game = new Game();
+      }
+      game.setupRegularMode();
+      gameState = GAME_REGULAR;
+      println("Starting game in regular mode");
+    } else if (gameState == GAME_OVER || gameState == GAME_WIN) {
+      gameState = MENU;
+      println("Returning to menu");
+    }
+  }
+}
+
+void keyReleased() {
+  // Only handle movement if in game states
+  if (gameState == GAME_REGULAR || gameState == GAME_SUDDEN_DEATH) {
+    if (game != null && game.player != null) {
+      // Stop acceleration when key is released
+      if (key == 'w' || key == 'W' || keyCode == UP) {
+        game.player.isAccelerating = false;
+      }
+      if (key == 's' || key == 'S' || keyCode == DOWN) {
+        // Stop active braking when brake key is released
+        game.player.isAccelerating = false;
+      }
+    }
+  }
 }
 
 /**
@@ -161,24 +272,31 @@ class PlayerCar {
   float x, y;
   float speed;
   float topSpeed;
+  float minSpeed;
   float acceleration;
+  boolean isAccelerating;  // Track if accelerator is pressed
   int health;
-  boolean hasDonut; // Invincibility against cops
+  boolean hasDonut;
   CarType carType;
   int carIndex;
   String carName;
+  float direction;
+  float turnSpeed;
   
   /**
    * Constructor for the PlayerCar class
    */
   PlayerCar(float x, float y) {
     this.x = x;
-    this.y = y;
-    this.speed = 0;
+    this.y = height * 0.8f;
+    this.minSpeed = 30;
+    this.speed = this.minSpeed;
+    this.isAccelerating = false;
     this.health = 3;
     this.hasDonut = false;
+    this.direction = -PI/2;
+    this.turnSpeed = 0.1;
     
-    // Default to standard car
     setCarType(CarType.STANDARD);
   }
   
@@ -192,19 +310,19 @@ class PlayerCar {
     switch(type) {
       case STANDARD:
         this.topSpeed = 150;
-        this.acceleration = 10;
+        this.acceleration = 0.5;
         this.carIndex = 0;
-        this.carName = "Standar";
+        this.carName = "Standard";
         break;
       case SUPER:
-        this.topSpeed = 250;
-        this.acceleration = 10;
+        this.topSpeed = 200;
+        this.acceleration = 0.7;
         this.carIndex = 1;
         this.carName = "Super";
         break;
       case SPORT:
-        this.topSpeed = 150;
-        this.acceleration = 20;
+        this.topSpeed = 180;
+        this.acceleration = 0.8;
         this.carIndex = 2;
         this.carName = "Sport";
         break;
@@ -215,46 +333,107 @@ class PlayerCar {
    * Updates the position and state of the player's car
    */
   void update() {
-    // Update car position based on speed
-    // This doesn't move the car on screen but affects distance traveled
+    // Handle acceleration/deceleration
+    if (isAccelerating) {
+      speed = min(speed + acceleration, topSpeed);
+      if (speed >= topSpeed && !maxSpeedSound.isPlaying()) {
+        maxSpeedSound.play();
+      }
+    } else {
+      // Natural deceleration when not accelerating
+      speed = max(speed - 0.1, minSpeed); // Very gradual natural deceleration
+    }
+    
+    // Calculate horizontal movement based on direction
+    float moveAmount = speed * 0.3;
+    x += moveAmount * cos(direction);
+    
+    // Keep car within horizontal bounds and handle edge collision
+    if (x < 30) {
+      x = 30;
+      direction = -PI/2;
+    } else if (x > width - 30) {
+      x = width - 30;
+      direction = -PI/2;
+    }
+    
+    // Keep y position fixed
+    y = height * 0.8f;
   }
   
   /**
    * Displays the player's car on screen
    */
   void display() {
-    // Will display car image and stats
+    pushMatrix();
+    translate(x, y);
+    rotate(direction + PI/2);
+    
+    // Draw car image
+    imageMode(CENTER);
+    image(playerCarImgs[carIndex], 0, 0, 60, 60);
+    
+    // Draw health indicators (rotate them to always face up)
+    rotate(-(direction + PI/2));
+    for (int i = 0; i < health; i++) {
+      fill(255, 0, 0);
+      ellipse(-20 + i * 10, -30, 5, 5);
+    }
+    
+    // Draw donut indicator if active
+    if (hasDonut) {
+      fill(255, 255, 0);
+      ellipse(20, -30, 8, 8);
+    }
+    
+    popMatrix();
   }
   
   /**
    * Increases the car's speed
    */
-   void accelerate() {
-     speed = min(speed + acceleration, topSpeed);
-     if (speed == topSpeed) {
-       maxSpeedSound.play();
-     } else {
-       speedIncreaseSound.play();
-     }
-   }
+  void accelerate() {
+    isAccelerating = true;
+    if (!speedIncreaseSound.isPlaying() && speed < topSpeed) {
+      speedIncreaseSound.play();
+    }
+  }
    
-   /**
-    * Decrease the car's speed
-    */
-    void decelerate() {
-      speed = max(speed - acceleration, 0);
+  /**
+   * Decrease the car's speed
+   */
+  void decelerate() {
+    // Active braking when S/DOWN is pressed - much more aggressive
+    speed = max(speed - 2.0, minSpeed); // Much more aggressive braking
+    if (!speedDecreaseSound.isPlaying()) {
       speedDecreaseSound.play();
     }
-    
-    /**
-     * Handles collision with other vehicles
-     * @return boolean True if the player is still alicve, false if dead
-     */
-    boolean handleCollision() {
-      this.health--;
-      carHitSound.play();
-      return this.health > 0;
-    }
+  }
+  
+  /**
+   * Turns the car left
+   */
+  void turnLeft() {
+    direction = constrain(direction - turnSpeed, -PI, 0); // Limit turning range
+  }
+  
+  /**
+   * Turns the car right
+   */
+  void turnRight() {
+    direction = constrain(direction + turnSpeed, -PI, 0); // Limit turning range
+  }
+  
+  /**
+   * Handles collision with other vehicles
+   * @return boolean True if the player is still alive, false if dead
+   */
+  boolean handleCollision() {
+    this.health--;
+    carHitSound.play();
+    speed = max(speed * 0.5, minSpeed);
+    return this.health > 0;
+  }
 }
 
 /** 
@@ -286,7 +465,9 @@ class PoliceCar {
    * To be implemeneted in future stages
    */
   void display() {
-    // Sill displa police car image
+    // Display police car image
+    imageMode(CENTER);
+    image(policeCarImg, x, y, 60, 60);
   }
   
   /**
@@ -325,7 +506,14 @@ class NPCVehicle {
    * To be implemented in future stages
    */
   void update(float playerSpeed) {
-    // Will update position based on player speed
+    // Move NPCs upward based on player speed
+    y += playerSpeed * 0.5;
+    
+    // Reset position when off screen
+    if (y > height + height) {
+      y = -height;
+      x = random(width);
+    }
   }
   
   /**
@@ -334,17 +522,8 @@ class NPCVehicle {
    */
   void display() {
     // Will display vehicle image
-    
-    // load upm cars
-    String[] npcCar_names = {"NPC_Blue.png", "NPC_Gray.png", "NPC_Orange.png", "NPC_Green.png", "NPC_Yellow.webp"};
-    
-    for(int i = 0; i < npcCar_names.length; i++) {
-      float x = random(0, width);
-      float y = random(-height, 0); // Start off-screen
-      PImage vehicleImage = loadImage(npcCar_names[(int)random(npcCar_names.length - 1)]);
-      game.npcCars.add(new NPCCar(x, y, vehicleImage));
-    
-    }
+    imageMode(CENTER);
+    image(vehicleImage, x, y, width, height);
   }
   
   /**
@@ -367,6 +546,13 @@ class NPCCar extends NPCVehicle {
   NPCCar(float x, float y) {
     super(x, y, npcCarImg, 60, 40);
   }
+  
+  /**
+   * Constructor with custom image
+   */
+  NPCCar(float x, float y, PImage customImage) {
+    super(x, y, customImage, 60, 40);
+  }
 }
 
 /**
@@ -385,41 +571,47 @@ class NPCTruck extends NPCVehicle {
  * Background class - represents the scrolling background
  */
 class Background {
-  float x;
-  float y;
-  float speed;
+  float y1, y2;
+  float scrollSpeed;
   PImage bgImg;
   
   /**
    * Constructor for the Background class
    */
   Background() {
-    this.x = 0;
-    this.y = 0;
-    this.speed = 2;
+    this.y1 = 0;
+    this.y2 = -height;
+    this.scrollSpeed = 0;
     this.bgImg = backgroundImg;
   }
   
   /**
-   * Updates the background's positions
-   * To be implemented in future stages
+   * Updates the background's positions based on player speed
    */
   void update(float playerSpeed) {
-    // Will update background position based on player speed
+    // Scroll speed is directly based on player speed
+    scrollSpeed = playerSpeed * 0.8;  // Increased multiplier significantly for faster scrolling
+    
+    // Update both background positions
+    y1 += scrollSpeed;
+    y2 += scrollSpeed;
+    
+    // Reset positions when backgrounds move off screen
+    if (y1 >= height) {
+      y1 = y2 - height;
+    }
+    if (y2 >= height) {
+      y2 = y1 - height;
+    }
   }
   
   /**
    * Displays the scrolling background
-   * To be implemented in future stages
    */
   void display() {
-    // Will display scrolling background
-    y+= speed;
-    if(y >= bgImg.height) {
-      y = 0;
-    }
-    image(bgImg, 0, y - bgImg.height);
-    image(bgImg, 0, y);
+    imageMode(CORNER);
+    image(bgImg, 0, y1, width, height);
+    image(bgImg, 0, y2, width, height);
   }
 }
 
@@ -432,9 +624,10 @@ class Game {
   ArrayList<NPCCar> npcCars;
   ArrayList<NPCTruck> npcTrucks;
   Background background;
+  PImage[] npcCarImages;  // Array to store NPC car images
   
   float timeLimit;
-  float timePassed;
+  float startTime;
   float distanceTraveled;
   float totalDistance;
   float speedLimit;
@@ -444,50 +637,201 @@ class Game {
    * Constructor for the Game class
    */
   Game() {
-    this.player = new PlayerCar(100, height/2);
+    this.player = new PlayerCar(width/2, height * 0.8f); // Position player at bottom center
     this.policeCar = new PoliceCar(-50, 50);
     this.npcCars = new ArrayList<NPCCar>();
     this.npcTrucks = new ArrayList<NPCTruck>();
     this.background = new Background();
     
+    // Load NPC car images
+    this.npcCarImages = NPCCar.loadNPCCarImages();
+    
     // Initialize game parameters
     this.timeLimit = 60; // 60 seconds
-    this.timePassed = 0;
+    this.startTime = millis();
     this.distanceTraveled = 0;
     this.totalDistance = 1000; // Units to travel
-    this.speedLimit = 7; // Speed limit
+    this.speedLimit = 55; // Speed limit
     this.winFlag = false;
   }
   
   /**
    * Updates the game state
-   * To be implemented in future stages
    */
   void update() {
-    // Will update all game elements
+    if (player == null) return;
+    
+    // Update player car first
+    player.update();
+    
+    // Update background based on player speed
+    background.update(player.speed);
+    
+    // Update police car
+    policeCar.update(player.speed);
+    
+    // Update NPC vehicles
+    for (NPCCar car : npcCars) {
+      car.update(player.speed);
+    }
+    for (NPCTruck truck : npcTrucks) {
+      truck.update(player.speed);
+    }
+    
+    // Update game time and distance
+    float currentTime = (millis() - startTime) / 1000.0; // Convert to seconds
+    if (player.speed > 0) {
+      distanceTraveled += player.speed * (1.0/60.0); // Assuming 60 FPS
+    }
+    
+    // Check for game over conditions
+    if (currentTime >= timeLimit) {
+      gameState = GAME_OVER;
+    }
+    
+    // Check for win condition
+    if (distanceTraveled >= totalDistance) {
+      gameState = GAME_WIN;
+      winFlag = true;
+    }
+    
+    // Check for collisions with NPC vehicles
+    for (NPCCar car : npcCars) {
+      if (car.checkCollision(player.x, player.y, 60, 60)) {
+        if (!player.handleCollision()) {
+          gameState = GAME_OVER;
+        }
+      }
+    }
+    for (NPCTruck truck : npcTrucks) {
+      if (truck.checkCollision(player.x, player.y, 60, 60)) {
+        if (!player.handleCollision()) {
+          gameState = GAME_OVER;
+        }
+      }
+    }
+    
+    // Check for police speed enforcement
+    if (policeCar.isCatchingSpeeder(player.speed, speedLimit, player.hasDonut)) {
+      if (!player.handleCollision()) {
+        gameState = GAME_OVER;
+      }
+    }
   }
   
   /**
    * Displays the game elements
-   * To be implemented in future stages
    */
   void display() {
-    // Will display all game elements
+    // Display background
+    background.display();
+    
+    // Display player car
+    if (player != null) {
+      player.display();
+    }
+    
+    // Display police car
+    policeCar.display();
+    
+    // Display NPC vehicles
+    for (NPCCar car : npcCars) {
+      car.display();
+    }
+    for (NPCTruck truck : npcTrucks) {
+      truck.display();
+    }
+    
+    // Display HUD
+    displayHUD();
+  }
+  
+  void displayHUD() {
+    float currentTime = (millis() - startTime) / 1000.0;
+    float timeRemaining = max(0, timeLimit - currentTime);
+    
+    fill(255);
+    textSize(24);
+    textAlign(LEFT);
+    text("Time: " + nf(timeRemaining, 0, 1) + "s", 20, 40);
+    text("Distance: " + nf(distanceTraveled, 0, 1) + "/" + nf(totalDistance, 0, 1), 20, 70);
+    if (player != null) {
+      text("Speed: " + player.speed, 20, 100);
+      text("Accelerating: " + player.isAccelerating, 20, 130);
+      text("Top Speed: " + player.topSpeed, 20, 160);
+    }
+    text("Health: " + (player != null ? player.health : 0), 20, 190);
+    
+    // Display speed limit when police car is nearby
+    if (policeCar.x > -100 && policeCar.x < width + 100) {
+      textAlign(CENTER);
+      text("Speed Limit: " + nf(speedLimit, 0, 0), width/2, 40);
+    }
   }
   
   /**
    * Sets up game for regular mode
-   * To be implemented in future stages
    */
   void setupRegularMode() {
-    // Will set up parameters for regular mode
+    // Reset game parameters
+    timeLimit = 60;
+    startTime = millis();
+    distanceTraveled = 0;
+    totalDistance = 1000;
+    speedLimit = 55;
+    winFlag = false;
+    
+    // Reset player
+    player = new PlayerCar(width/2, height * 0.8f);
+    
+    // Reset police car
+    policeCar = new PoliceCar(-50, 50);
+    
+    // Clear and reset NPC vehicles
+    npcCars.clear();
+    npcTrucks.clear();
+    
+    // Add initial NPC vehicles with random images
+    for (int i = 0; i < 5; i++) {
+      float x = random(width);
+      float y = random(-height, 0); // Start off-screen
+      PImage randomImage = npcCarImages[(int)random(npcCarImages.length)];
+      npcCars.add(new NPCCar(x, y, randomImage));
+    }
+    for (int i = 0; i < 2; i++) {
+      npcTrucks.add(new NPCTruck(random(width), random(height)));
+    }
   }
   
   /**
    * Sets up the game for sudden death mode
-   * To be implemented in future stages
    */
   void setupSuddenDeathMode() {
-    // Will set up parameters for sudden death mode
+    // Set up parameters for sudden death mode
+    timeLimit = 30; // Shorter time limit
+    startTime = millis();
+    distanceTraveled = 0;
+    totalDistance = 1500; // Longer distance
+    speedLimit = 45; // Lower speed limit
+    winFlag = false;
+    
+    // Reset player with 1 health
+    player = new PlayerCar(100, height/2);
+    player.health = 1;
+    
+    // Reset police car
+    policeCar = new PoliceCar(-50, 50);
+    
+    // Clear and reset NPC vehicles with more vehicles
+    npcCars.clear();
+    npcTrucks.clear();
+    
+    // Add more NPC vehicles for increased difficulty
+    for (int i = 0; i < 8; i++) {
+      npcCars.add(new NPCCar(random(width), random(height)));
+    }
+    for (int i = 0; i < 4; i++) {
+      npcTrucks.add(new NPCTruck(random(width), random(height)));
+    }
   }
 }
