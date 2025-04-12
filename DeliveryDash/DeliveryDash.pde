@@ -488,70 +488,76 @@ class NPCVehicle {
   float speed;
   PImage vehicleImage;
   float width, height;
+  int lane; // Track which lane the vehicle is in
   
   /**
    * Constructor for the NPCVehicle class
    */
   NPCVehicle(float x, float y, PImage vehicleImage, float w, float h) {
-    this.x = x;
-    this.y = y;
-    this.speed = 0;
+    this.y = y;  // Set y position first
+    this.speed = 55; // Default to speed limit
     this.vehicleImage = vehicleImage;
     this.width = w;
     this.height = h;
+    this.lane = (int)random(4); // Randomly assign to one of 4 lanes
+    this.x = getLaneX(this.lane); // Position in the assigned lane
   }
   
   /**
-   * Updaets the NPC vehicle's position
-   * To be implemented in future stages
+   * Get the x position for a given lane
+   */
+  float getLaneX(int lane) {
+    float margin = 50; // Add margin from screen edges
+    float availableWidth = width - (2 * margin);
+    float adjustedLaneWidth = availableWidth / 4.0;
+    return margin + (lane * adjustedLaneWidth) + (adjustedLaneWidth / 2.0);
+  }
+  
+  /**
+   * Updates the NPC vehicle's position
    */
   void update(float playerSpeed) {
-    // Move NPCs upward based on player speed
-    y += playerSpeed * 0.5;
+    // Move NPCs at a constant base speed, modified by player speed
+    float speedLimit = 55;
+    float baseSpeed = 3; // Increased base speed
+    float relativeSpeed = playerSpeed - speedLimit;
+    y += baseSpeed + (relativeSpeed * 0.3);  // Adjusted multiplier for smoother movement
     
     // Reset position when off screen
-    if (y > height + height) {
-      y = -height;
-      x = random(width);
+    if (y > height + 100) {  // Give some buffer before resetting
+      y = -100;  // Start slightly above screen
+      lane = (int)random(4);
+      x = getLaneX(lane);
     }
   }
   
   /**
    * Displays the NPC vehicle on screen
-   * To be implemented in future stages
    */
   void display() {
-    // Will display vehicle image
     imageMode(CENTER);
     image(vehicleImage, x, y, width, height);
   }
   
   /**
-   * Checks for collision withh the player's car
-   * To be implmented in future stages
+   * Checks for collision with the player's car
    */
   boolean checkCollision(float playerX, float playerY, float playerWidth, float playerHeight) {
-    // Will check for collisions
-    return false;
+    // Simple rectangle collision detection
+    return abs(playerX - x) < (playerWidth + width) / 2 &&
+           abs(playerY - y) < (playerHeight + height) / 2;
   }
 }
 
 /**
- * NPCCar class - represnets civilian cars on road
+ * NPCCar class - represents civilian cars on road
  */
 class NPCCar extends NPCVehicle {
   /**
    * Constructor for the NPCCar class
    */
   NPCCar(float x, float y) {
-    super(x, y, npcCarImg, 60, 40);
-  }
-  
-  /**
-   * Constructor with custom image
-   */
-  NPCCar(float x, float y, PImage customImage) {
-    super(x, y, customImage, 60, 40);
+    super(x, y, npcCarImg, 50, 80); // Adjusted size to be more realistic
   }
 }
 
@@ -560,10 +566,10 @@ class NPCCar extends NPCVehicle {
  */
 class NPCTruck extends NPCVehicle {
   /**
-   * Constrictor for the NPCTruck class
+   * Constructor for the NPCTruck class
    */
   NPCTruck(float x, float y) {
-    super(x, y, npcTruckImg, 100, 50);
+    super(x, y, npcTruckImg, 70, 120); // Adjusted size to be more realistic
   }
 }
 
@@ -624,7 +630,6 @@ class Game {
   ArrayList<NPCCar> npcCars;
   ArrayList<NPCTruck> npcTrucks;
   Background background;
-  PImage[] npcCarImages;  // Array to store NPC car images
   
   float timeLimit;
   float startTime;
@@ -642,9 +647,6 @@ class Game {
     this.npcCars = new ArrayList<NPCCar>();
     this.npcTrucks = new ArrayList<NPCTruck>();
     this.background = new Background();
-    
-    // Load NPC car images
-    this.npcCarImages = NPCCar.loadNPCCarImages();
     
     // Initialize game parameters
     this.timeLimit = 60; // 60 seconds
@@ -791,16 +793,20 @@ class Game {
     npcCars.clear();
     npcTrucks.clear();
     
-    // Add initial NPC vehicles with random images
-    for (int i = 0; i < 5; i++) {
-      float x = random(width);
-      float y = random(-height, 0); // Start off-screen
-      PImage randomImage = npcCarImages[(int)random(npcCarImages.length)];
-      npcCars.add(new NPCCar(x, y, randomImage));
+    // Add cars to each lane with different vertical spacing
+    for (int lane = 0; lane < 4; lane++) {  // One car per lane
+      float startY = random(-height/2, height/2);  // Random vertical position
+      NPCCar car = new NPCCar(0, startY);  // x will be set by lane in constructor
+      car.lane = lane;  // Explicitly set the lane
+      car.x = car.getLaneX(lane);  // Set x position for this lane
+      npcCars.add(car);
     }
-    for (int i = 0; i < 2; i++) {
-      npcTrucks.add(new NPCTruck(random(width), random(height)));
-    }
+    
+    // Add one truck in a random lane
+    NPCTruck truck = new NPCTruck(0, -height/2);
+    truck.lane = (int)random(4);
+    truck.x = truck.getLaneX(truck.lane);
+    npcTrucks.add(truck);
   }
   
   /**
