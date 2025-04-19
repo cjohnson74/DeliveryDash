@@ -4,7 +4,7 @@
  * avoiding collisions with other vehicles and staying within the speed limit
  * when polic cars are present.
  * 
- * Team Members: Braulio, Edwyn, Ethan, Carson
+ * Team Members: Braulio, Edwin, Ethan, Carson
 */
 
 // Image variables
@@ -35,6 +35,8 @@ final int GAME_SUDDEN_DEATH = 2;
 final int GAME_OVER = 3;
 final int GAME_WIN = 4;
 int gameState = MENU;
+ArrayList<Button> menuButtons = new ArrayList<Button>();
+CarType selectedCar = CarType.STANDARD; // Default
 
 // Game instance
 Game game;
@@ -46,7 +48,34 @@ void setup() {
   size(1024, 1024);
   loadResources();
   backgroundMusic.loop();
+  backgroundMusic.amp(0.10);
   game = new Game();
+  
+  menuButtons.clear();
+  menuButtons.add(new Button(width/2 - 150, 180, 300, 50, "Car: Standard", () -> {
+    selectedCar = CarType.STANDARD;
+  }));
+  menuButtons.add(new Button(width/2 - 150, 240, 300, 50, "Car: Super", () -> {
+    selectedCar = CarType.SUPER;
+  }));
+  menuButtons.add(new Button(width/2 - 150, 300, 300, 50, "Car: Sport", () -> {
+    selectedCar = CarType.SPORT;
+  }));
+  menuButtons.add(new Button(width/2 - 150, 400, 300, 50, "Start Regular Mode", () -> {
+    if (game == null) game = new Game();
+    game.player.setCarType(selectedCar);
+    game.setupRegularMode();
+    gameState = GAME_REGULAR;
+  }));
+  menuButtons.add(new Button(width/2 - 150, 460, 300, 50, "Start Sudden Death", () -> {
+    if (game == null) game = new Game();
+    game.player.setCarType(selectedCar);
+    game.setupSuddenDeathMode(); // You may need to create this
+    gameState = GAME_SUDDEN_DEATH;
+  }));
+  menuButtons.add(new Button(width/2 - 150, 520, 300, 50, "Exit", () -> {
+    exit();
+  }));
   gameState = MENU; // Start in menu mode
 }
 
@@ -64,9 +93,9 @@ void loadResources() {
   // Load different player car images from sprite sheet
   playerCarImgs = new PImage[3];
   // Extract car images from sprite sheet (you may need to adjust these coordinates based on the actual sprite sheet layout)
-  playerCarImgs[0] = vehicleSpriteSheet.get(0, 0, 180, 180); // Standard car
-  playerCarImgs[1] = vehicleSpriteSheet.get(180, 0, 180, 180); // Super car
-  playerCarImgs[2] = vehicleSpriteSheet.get(360, 0, 180, 180); // Sport car
+  playerCarImgs[0] = vehicleSpriteSheet.get(0, 0, 120, 160); // Standard car
+  playerCarImgs[1] = vehicleSpriteSheet.get(130, 0, 120, 180); // Super car
+  playerCarImgs[2] = vehicleSpriteSheet.get(260, 0, 120, 180); // Sport car
   
   policeCarImg = vehicleSpriteSheet.get(540, 0, 180, 180); // Police car
   npcCarImg = loadImage("images/NPC_Blue.png");
@@ -170,6 +199,9 @@ void drawMenu() {
   text("Select Game Mode:", width/2, 350);
   
   // Mode buttons would go here
+  for (Button b : menuButtons) {
+    b.display();
+  }
 }
 
 /**
@@ -247,12 +279,13 @@ void keyReleased() {
   }
 }
 
-/**
- * Handles mouse clicks for menu navigation
- * To be implemented in future stages
- */
 void mousePressed() {
   // Will handle menu button clicks
+  if(gameState == MENU) {
+    for(Button b : menuButtons) {
+      b.handleClick();
+    }
+  }
 }
 
 /**
@@ -275,6 +308,7 @@ class PlayerCar {
   float minSpeed;
   float acceleration;
   boolean isAccelerating;  // Track if accelerator is pressed
+  boolean isDeccelerating;
   int health;
   boolean hasDonut;
   CarType carType;
@@ -292,6 +326,7 @@ class PlayerCar {
     this.minSpeed = 30;
     this.speed = this.minSpeed;
     this.isAccelerating = false;
+    this.isDeccelerating = false;
     this.health = 3;
     this.hasDonut = false;
     this.direction = -PI/2;
@@ -371,13 +406,14 @@ class PlayerCar {
     
     // Draw car image
     imageMode(CENTER);
-    image(playerCarImgs[carIndex], 0, 0, 60, 60);
+    print("carIndex: " + carIndex + " ");
+    image(playerCarImgs[carIndex], 0, 0, 60*2, 60*2);
     
     // Draw health indicators (rotate them to always face up)
     rotate(-(direction + PI/2));
     for (int i = 0; i < health; i++) {
       fill(255, 0, 0);
-      ellipse(-20 + i * 10, -30, 5, 5);
+      ellipse(i * 10, -30, 5, 5);
     }
     
     // Draw donut indicator if active
@@ -838,6 +874,42 @@ class Game {
     }
     for (int i = 0; i < 4; i++) {
       npcTrucks.add(new NPCTruck(random(width), random(height)));
+    }
+  }
+}
+
+class Button {
+  float x, y, w, h;
+  String label;
+  color bgColor;
+  color hoverColor;
+  boolean isHovered = false;
+  Runnable action;
+
+  Button(float x, float y, float w, float h, String label, Runnable action) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.label = label;
+    this.bgColor = color(70, 130, 180);
+    this.hoverColor = color(100, 160, 210);
+    this.action = action;
+  }
+
+  void display() {
+    isHovered = (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h);
+    fill(isHovered ? hoverColor : bgColor);
+    rect(x, y, w, h, 10);
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textSize(20);
+    text(label, x + w / 2, y + h / 2);
+  }
+
+  void handleClick() {
+    if (isHovered && action != null) {
+      action.run();
     }
   }
 }
