@@ -94,8 +94,8 @@ void loadResources() {
   playerCarImgs = new PImage[3];
   // Extract car images from sprite sheet (you may need to adjust these coordinates based on the actual sprite sheet layout)
   playerCarImgs[0] = vehicleSpriteSheet.get(0, 0, 120, 160); // Standard car
-  playerCarImgs[1] = vehicleSpriteSheet.get(130, 0, 120, 180); // Super car
-  playerCarImgs[2] = vehicleSpriteSheet.get(260, 0, 120, 180); // Sport car
+  playerCarImgs[1] = vehicleSpriteSheet.get(130, 0, 120, 160); // Super car
+  playerCarImgs[2] = vehicleSpriteSheet.get(260, 0, 120, 160); // Sport car
   
   policeCarImg = vehicleSpriteSheet.get(540, 0, 180, 180); // Police car
   npcCarImg = loadImage("images/NPC_Blue.png");
