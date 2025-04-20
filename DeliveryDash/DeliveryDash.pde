@@ -590,7 +590,7 @@ class NPCVehicle {
    */
   void display() {
     imageMode(CENTER);
-    image(vehicleImage, x, y, width, height);
+    image(npcRedImg, x, y, width, height);
   }
   
   /**
