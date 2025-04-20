@@ -28,6 +28,12 @@ SoundFile deathSound;
 SoundFile policeSirenSound;
 SoundFile tiresScreechSound;
 
+enum CarType {
+  STANDARD, // Balance performance
+  SUPER, // High top speed, low acceleration
+  SPORT // Low top speed, high acceleration
+}
+
 // Game state constants
 final int MENU = 0;
 final int GAME_REGULAR = 1;
@@ -84,7 +90,7 @@ void setup() {
 */
 void loadResources() {
   // Load images
-  backgroundImg = loadImage("images/background.png");
+  backgroundImg = loadImage("images/background-1.png");
   bg = new Background();
   
   // Load vehicle sprite sheet
@@ -93,9 +99,9 @@ void loadResources() {
   // Load different player car images from sprite sheet
   playerCarImgs = new PImage[3];
   // Extract car images from sprite sheet (you may need to adjust these coordinates based on the actual sprite sheet layout)
-  playerCarImgs[0] = vehicleSpriteSheet.get(0, 0, 120, 160); // Standard car
-  playerCarImgs[1] = vehicleSpriteSheet.get(130, 0, 120, 160); // Super car
-  playerCarImgs[2] = vehicleSpriteSheet.get(260, 0, 120, 160); // Sport car
+  playerCarImgs[0] = loadImage("images/Normal_Car.png"); // Standard car
+  playerCarImgs[1] = loadImage("images/Sports_Car.png"); // Super car
+  playerCarImgs[2] = loadImage("images/Super_Car.png"); // Sport car
   
   policeCarImg = vehicleSpriteSheet.get(540, 0, 180, 180); // Police car
   npcCarImg = loadImage("images/NPC_Blue.png");
@@ -291,11 +297,11 @@ void mousePressed() {
 /**
  * CarType enum - defines different types of cars player can choose
  */
-enum CarType {
-  STANDARD, // Balance performance
-  SUPER, // High top speed, low acceleration
-  SPORT // Low top speed, high acceleration
-}
+//enum CarType {
+//  STANDARD, // Balance performance
+//  SUPER, // High top speed, low acceleration
+//  SPORT // Low top speed, high acceleration
+//}
 
 /**
  * PlayerCar class - represents the player's vehicle
@@ -320,9 +326,9 @@ class PlayerCar {
   /**
    * Constructor for the PlayerCar class
    */
-  PlayerCar(float x, float y) {
+  PlayerCar(float x, float y, CarType carType) {
     this.x = x;
-    this.y = height * 0.8f;
+    this.y = height * 0.65f;
     this.minSpeed = 30;
     this.speed = this.minSpeed;
     this.isAccelerating = false;
@@ -332,7 +338,7 @@ class PlayerCar {
     this.direction = -PI/2;
     this.turnSpeed = 0.1;
     
-    setCarType(CarType.STANDARD);
+    setCarType(selectedCar);
   }
   
   /**
@@ -393,7 +399,7 @@ class PlayerCar {
     }
     
     // Keep y position fixed
-    y = height * 0.8f;
+    y = height * 0.65f;
   }
   
   /**
@@ -407,7 +413,7 @@ class PlayerCar {
     // Draw car image
     imageMode(CENTER);
     print("carIndex: " + carIndex + " ");
-    image(playerCarImgs[carIndex], 0, 0, 60*2, 60*2);
+    image(playerCarImgs[carIndex], 0, 0, 60*1.7, 60*2.5);
     
     // Draw health indicators (rotate them to always face up)
     rotate(-(direction + PI/2));
@@ -678,7 +684,7 @@ class Game {
    * Constructor for the Game class
    */
   Game() {
-    this.player = new PlayerCar(width/2, height * 0.8f); // Position player at bottom center
+    this.player = new PlayerCar(width/2, height * 0.8f, selectedCar); // Position player at bottom center
     this.policeCar = new PoliceCar(-50, 50);
     this.npcCars = new ArrayList<NPCCar>();
     this.npcTrucks = new ArrayList<NPCTruck>();
@@ -820,7 +826,7 @@ class Game {
     winFlag = false;
     
     // Reset player
-    player = new PlayerCar(width/2, height * 0.8f);
+    player = new PlayerCar(width/2, height * 0.8f, selectedCar);
     
     // Reset police car
     policeCar = new PoliceCar(-50, 50);
@@ -858,7 +864,7 @@ class Game {
     winFlag = false;
     
     // Reset player with 1 health
-    player = new PlayerCar(100, height/2);
+    player = new PlayerCar(100, height/2, selectedCar);
     player.health = 1;
     
     // Reset police car
