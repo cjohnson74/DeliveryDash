@@ -379,7 +379,7 @@ class PlayerCar {
       speed = min(speed + acceleration, topSpeed);
       if (speed >= topSpeed && !maxSpeedSound.isPlaying()) {
         maxSpeedSound.amp(0.01);
-        maxSpeedSound.play();
+        //maxSpeedSound.play();
       }
     } else {
       // Natural deceleration when not accelerating
