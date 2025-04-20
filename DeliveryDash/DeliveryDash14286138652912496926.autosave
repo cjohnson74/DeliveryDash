@@ -108,11 +108,10 @@ void loadResources() {
   playerCarImgs[2] = loadImage("images/Super_Car.png"); // Sport car
   
   policeCarImg = loadImage("images/Police_Car.png"); // Police car
-  
   npcCarImg = loadImage("images/NPC_Blue.png");
-  //npcCarImg = loadImage("images/Normal_Car.png");
+  npcCarImg = loadImage("images/Normal_Car.png");
   npcTruckImg = vehicleSpriteSheet.get(720, 0, 180, 180); // Truck
-  //npcTruckImg = loadImage("images/Normal_Car.png");
+  npcTruckImg = loadImage("images/Normal_Car.png");
   donutImg = loadImage("images/donut.jpg");
   npcRedImg = loadImage("images/Normal_Car.png");
   npcBlueImg = loadImage("images/NPC_Blue.png");
@@ -378,7 +377,6 @@ class PlayerCar {
     if (isAccelerating) {
       speed = min(speed + acceleration, topSpeed);
       if (speed >= topSpeed && !maxSpeedSound.isPlaying()) {
-        maxSpeedSound.amp(0.01);
         maxSpeedSound.play();
       }
     } else {
@@ -438,7 +436,6 @@ class PlayerCar {
   void accelerate() {
     isAccelerating = true;
     if (!speedIncreaseSound.isPlaying() && speed < topSpeed) {
-      speedIncreaseSound.amp(0.05);
       speedIncreaseSound.play();
     }
   }
@@ -450,7 +447,6 @@ class PlayerCar {
     // Active braking when S/DOWN is pressed - much more aggressive
     speed = max(speed - 2.0, minSpeed); // Much more aggressive braking
     if (!speedDecreaseSound.isPlaying()) {
-      speedDecreaseSound.amp(0.01);
       speedDecreaseSound.play();
     }
   }
@@ -475,7 +471,6 @@ class PlayerCar {
    */
   boolean handleCollision() {
     this.health--;
-    carHitSound.amp(0.01);
     carHitSound.play();
     speed = max(speed * 0.5, minSpeed);
     return this.health > 0;
