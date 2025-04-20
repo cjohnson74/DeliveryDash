@@ -12,7 +12,13 @@ PImage backgroundImg;
 Background bg;
 PImage[] playerCarImgs; // Array of different car images
 PImage policeCarImg;
+PImage npcRedImg;
+PImage npcBlueImg;
+PImage npcGreenImg;
+PImage npcTrailerImg;
+PImage npcLogImg;
 PImage npcCarImg;
+
 PImage npcTruckImg;
 PImage donutImg;
 PImage vehicleSpriteSheet; // Add sprite sheet variable
@@ -101,12 +107,18 @@ void loadResources() {
   playerCarImgs[1] = loadImage("images/Sports_Car.png"); // Super car
   playerCarImgs[2] = loadImage("images/Super_Car.png"); // Sport car
   
-  policeCarImg = vehicleSpriteSheet.get(540, 0, 180, 180); // Police car
+  policeCarImg = loadImage("images/Police_Car.png"); // Police car
   npcCarImg = loadImage("images/NPC_Blue.png");
   npcCarImg = loadImage("images/Normal_Car.png");
   npcTruckImg = vehicleSpriteSheet.get(720, 0, 180, 180); // Truck
   npcTruckImg = loadImage("images/Normal_Car.png");
   donutImg = loadImage("images/donut.jpg");
+  npcRedImg = loadImage("images/Normal_Car.png");
+  npcBlueImg = loadImage("images/NPC_Blue.png");
+  npcGreenImg = loadImage("images/NPC_Green.png");
+  npcTrailerImg = loadImage("images/Trailer_NPC.png");
+  npcLogImg = loadImage("images/Logs_NPC.png");
+  
   
   // Load sounds
   backgroundMusic = new SoundFile(this, "sounds/background_music.mp3");
@@ -403,11 +415,11 @@ class PlayerCar {
     image(playerCarImgs[carIndex], 0, 0, 60*1.7, 60*2.5);
     
     // Draw health indicators (rotate them to always face up)
-    rotate(-(direction + PI/2));
-    for (int i = 0; i < health; i++) {
-      fill(255, 0, 0);
-      ellipse(i * 10, -30, 5, 5);
-    }
+    //rotate(-(direction + PI/2));
+    //for (int i = 0; i < health; i++) {
+    //  fill(255, 0, 0);
+    //  ellipse(i * 10, -30, 5, 5);
+    //}
     
     // Draw donut indicator if active
     if (hasDonut) {
@@ -756,10 +768,11 @@ class Game {
   void display() {
     // Display background
     background.display();
-    
+
     // Display player car
     if (player != null) {
       player.display();
+      healthBar(player.health);
     }
     
     // Display police car
@@ -912,3 +925,29 @@ class Button {
     }
   }
 }
+  
+  
+void healthBar(int health){
+  stroke(255);
+  noFill();
+  ellipse(width-50, 40, 50, 50);
+  ellipse(width-125, 40, 50, 50);
+  ellipse(width-200, 40, 50, 50);
+  
+  if(health == 1){
+    fill(255,0,0);
+    ellipse(width-200, 40, 50, 50);
+  }
+  if(health == 2){
+    fill(255,0,0);
+    ellipse(width-125, 40, 50, 50);
+    ellipse(width-200, 40, 50, 50);
+  }
+  if(health == 3){
+    fill(255,0,0);
+    ellipse(width-50, 40, 50, 50);
+    ellipse(width-125, 40, 50, 50);
+    ellipse(width-200, 40, 50, 50);
+  }
+    
+  }
